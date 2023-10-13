@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BlogWithoutAuth</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BlogWithoutAuth.styles.css" asp-append-version="true" />
+</head>
+<body class="h-100">
+    <main class="d-flex flex-nowrap h-100">
+        <div class="d-flex justify-content-between">
+            <div class="d-flex flex-column flex-shrink-0 p-3 bg-dark h-100"
+                 style="width: 280px">
+                <a href="/"
+                   class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                    <span class="fs-4">Blog CMS</span>
+                </a>
+                <hr />
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a asp-controller="Home" asp-action="Index" class="nav-link text-white" aria-current="page">
+                            <i class="bi bi-house"></i>
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Posts" asp-action="Index" class="nav-link text-white">
+                            <i class="bi bi-speedometer"></i>
+                            Posts
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Authors" asp-action="Index" class="nav-link text-white">
+                            <i class="bi bi-border"></i>
+                            Authors
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Categories" asp-action="Index" class="nav-link text-white">
+                            <i class="bi bi-basket"></i>
+                            Categories
+                        </a>
+                        <a asp-controller="Tags" asp-action="Index" class="nav-link text-white">
+                            <i class="bi bi-basket"></i>
+                            Tags
+                        </a>
+                    </li>
+@*                     <li>
+                        <a asp-controller="Tags" asp-action="Index" class="nav-link text-white">
+                            <i class="bi bi-person"></i>
+                            Tags
+                        </a>
+                    </li> *@
+                </ul>
+            </div>
+
+            <div class="p-4">
+                @RenderBody()
+            </div>
+
+        </div>
+    </main>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

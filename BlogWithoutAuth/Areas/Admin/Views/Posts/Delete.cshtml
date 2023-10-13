@@ -35,6 +35,23 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Category.Name)
         </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Tags)
+        </dt>
+        <dd class="col-sm-10">
+            @for (int i = 0; i < Model.Tags.Count; i++)
+            {
+                if (i == Model.Tags.Count - 1)
+                {
+                    ViewBag.TagStr += Model.Tags[i].Name;
+                }
+                else
+                {
+                    ViewBag.TagStr += Model.Tags[i].Name + " | ";
+                }
+            }
+            @ViewBag.TagStr
+        </dd>
     </dl>
     
     <form asp-action="Delete">

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BlogWithoutAuth.DataAccess;
 using BlogWithoutAuth.Models;
 using System.Diagnostics;
+using BlogWithoutAuth.Models.ViewModels;
 
 namespace BlogWithoutAuth.Areas.Admin.Controllers
 {
@@ -24,7 +25,7 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
         // GET: Admin/Posts
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Posts.Include(p => p.Author).Include(p => p.Category);
+            var appDbContext = _context.Posts.Include(p => p.Author).Include(p => p.Category).Include(p=>p.Tags);
             return View(await appDbContext.ToListAsync());
         }
 
@@ -53,7 +54,7 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
         {
             ViewData["AuthorId"] = new SelectList(_context.Authors, "Id", "Name");
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
-            ViewData["Tags"] = new SelectList(_context.Tags,"Id", "Name");
+            ViewData["Tags"] = new SelectList(_context.Tags, "Id", "Name");
             ViewData["TagList"] = _context.Tags.ToList();
             return View();
         }
@@ -63,21 +64,29 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,AuthorId,CategoryId,TagString,Title,Content")] Post post)
+        public async Task<IActionResult> Create([Bind("Id,AuthorId,CategoryId,TagsString,Title,Content")] Post post)
         {
+            foreach (var item in post.Tags)
+            {
+                Debug.WriteLine(item);
+            }
+
             post.Id = Guid.NewGuid();
+            //post.Title = postVM.Post.Title;
+            //post.Content = postVM.Post.Content;
+            //post.Author = postVM.Post.Author;
+            //post.Category = postVM.Post.Category;
             //Guid mainGuid = Guid.Parse("18930D8B-88AA-4FCE-02CB-08DBCB2F2C93");
             //Guid mainGuid2 = Guid.Parse("FF7DA7E2-DCCE-48E8-B2A2-FC8421CBBB41");
             //Debug.WriteLine(post.TagString.Length);
             List<Tag> tagsToDb = new List<Tag>();
-            foreach (var tagId in post.TagString)
+            foreach (var tagId in post.TagsString)
             {
                 tagsToDb.Add(_context.Tags.Find(Guid.Parse(tagId)));
             }
             post.Tags = tagsToDb;
-            
+
             _context.Add(post);
-            
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -85,6 +94,7 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
         // GET: Admin/Posts/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
+            ViewData["Tags"] = new SelectList(_context.Tags, "Id", "Name");
             if (id == null || _context.Posts == null)
             {
                 return NotFound();
@@ -106,7 +116,7 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,AuthorId,CategoryId,TagString,Title,Content")] Post post)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,AuthorId,CategoryId,TagsString,Title,Content")] Post post)
         {
             if (id != post.Id)
             {
@@ -115,12 +125,13 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
             try
             {
                 List<Tag> tagsToDb = new List<Tag>();
-                foreach (var tagId in post.TagString)
+                foreach (var tagId in post.TagsString)
                 {
                     Debug.WriteLine("I am working");
                     tagsToDb.Add(_context.Tags.Find(Guid.Parse(tagId)));
                 }
-                _context.Database.ExecuteSql($"DELETE FROM dbo.PostTag WHERE PostsId = {id}");
+                //_context.Database.ExecuteSql($"DELETE FROM dbo.PostTag WHERE PostsId = {id}");
+                await _context.PostTag.Where(x => x.PostId == id).ExecuteDeleteAsync();
                 post.Tags = tagsToDb;
                 //_context.Attach(post);
                 _context.Update(post);

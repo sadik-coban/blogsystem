@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Index";
+    ViewData["TagStr"] = "";
 }
 
 <h1>Posts</h1>
@@ -24,6 +25,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Category)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Tags)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -43,6 +47,23 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Category.Name)
                 </td>
+                <td>
+                    @for (int i = 0; i < item.Tags.Count; i++)
+                    {
+                        if(i == item.Tags.Count - 1)
+                        {
+                            ViewBag.TagStr += item.Tags[i].Name;
+                        }
+                        else
+                        {
+                            ViewBag.TagStr += item.Tags[i].Name + " | ";
+                        }
+                    }
+                    @ViewBag.TagStr  
+                </td>
+                @{
+                    ViewData["TagStr"] = "";
+                }
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a> |

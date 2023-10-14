@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BlogWithoutAuth.styles.css" asp-append-version="true" />
 </head>
-<body class="h-100">
+<body class="h-100 overflow-hidden">
     <main class="d-flex flex-nowrap h-100">
         <div class="d-flex justify-content-between">
             <div class="d-flex flex-column flex-shrink-0 p-3 bg-dark h-100"
@@ -56,7 +56,7 @@
                 </ul>
             </div>
 
-            <div class="p-4">
+            <div class="p-4 overflow-auto">
                 @RenderBody()
             </div>
 

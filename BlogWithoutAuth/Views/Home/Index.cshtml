@@ -1,8 +1,43 @@
-﻿@{
+﻿@model IEnumerable<BlogWithoutAuth.Models.Post>
+
+@{
     ViewData["Title"] = "Home Page";
+    ViewData["TagStr"] = "";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="d-flex align-content-start flex-wrap gap-3">
+    @foreach (var item in Model)
+    {
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">@Html.DisplayFor(modelItem => item.Title)</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary">
+                    @Html.DisplayFor(modelItem => item.Author.Name)
+                </h6>
+                <h6 class="card-subtitle mb-2 text-body-secondary">@Html.DisplayFor(modelItem => item.Category.Name)</h6>
+                <h6 class="card-subtitle mb-2 text-body-secondary">
+                    @for (int i = 0; i < item.Tags.Count; i++)
+                    {
+                        if (i == item.Tags.Count - 1)
+                        {
+                            ViewBag.TagStr += item.Tags[i].Name;
+                        }
+                        else
+                        {
+                            ViewBag.TagStr += item.Tags[i].Name + " | ";
+                        }
+                    }
+                    @ViewBag.TagStr
+                </h6>
+                @{
+                    ViewData["TagStr"] = "";
+                }
+                <p class="card-text">@* @Html.DisplayFor(modelItem => item.Content) *@
+                    @Html.Raw(item.Content)
+                    </p>
+                <a asp-action="Post" asp-route-id="@item.Id" class="card-link">Article</a>
+            </div>
+        </div>
+    }
+
 </div>

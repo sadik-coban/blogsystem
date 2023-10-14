@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BlogWithoutAuth.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Header", required: false)
 </head>
 <body class="h-100 overflow-hidden">
     <main class="d-flex flex-nowrap h-100">

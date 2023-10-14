@@ -55,7 +55,6 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
             ViewData["AuthorId"] = new SelectList(_context.Authors, "Id", "Name");
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
             ViewData["Tags"] = new SelectList(_context.Tags, "Id", "Name");
-            ViewData["TagList"] = _context.Tags.ToList();
             return View();
         }
 
@@ -66,26 +65,7 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,AuthorId,CategoryId,TagsString,Title,Content")] Post post)
         {
-            foreach (var item in post.Tags)
-            {
-                Debug.WriteLine(item);
-            }
-
-            post.Id = Guid.NewGuid();
-            //post.Title = postVM.Post.Title;
-            //post.Content = postVM.Post.Content;
-            //post.Author = postVM.Post.Author;
-            //post.Category = postVM.Post.Category;
-            //Guid mainGuid = Guid.Parse("18930D8B-88AA-4FCE-02CB-08DBCB2F2C93");
-            //Guid mainGuid2 = Guid.Parse("FF7DA7E2-DCCE-48E8-B2A2-FC8421CBBB41");
-            //Debug.WriteLine(post.TagString.Length);
-            List<Tag> tagsToDb = new List<Tag>();
-            foreach (var tagId in post.TagsString)
-            {
-                tagsToDb.Add(_context.Tags.Find(Guid.Parse(tagId)));
-            }
-            post.Tags = tagsToDb;
-
+            post.Tags = await _context.Tags.Where(tagDB => post.TagsString.Any(tagSelected => tagSelected == tagDB.Id)).ToListAsync();
             _context.Add(post);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -94,20 +74,20 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
         // GET: Admin/Posts/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
-            ViewData["Tags"] = new SelectList(_context.Tags, "Id", "Name");
             if (id == null || _context.Posts == null)
             {
                 return NotFound();
             }
 
             var post = await _context.Posts.FindAsync(id);
+            Guid[] tagIds = await _context.Posts.Where(post => post.Id == id).SelectMany(post => post.PostTags.Select(postTag => postTag.TagsId)).ToArrayAsync();
             if (post == null)
             {
                 return NotFound();
             }
             ViewData["AuthorId"] = new SelectList(_context.Authors, "Id", "Name", post.AuthorId);
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", post.CategoryId);
-            ViewData["TagList"] = _context.Tags.ToList();
+            ViewData["Tags"] = new MultiSelectList(_context.Tags, "Id", "Name", tagIds);
             return View(post);
         }
 
@@ -124,16 +104,8 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
             }
             try
             {
-                List<Tag> tagsToDb = new List<Tag>();
-                foreach (var tagId in post.TagsString)
-                {
-                    Debug.WriteLine("I am working");
-                    tagsToDb.Add(_context.Tags.Find(Guid.Parse(tagId)));
-                }
-                //_context.Database.ExecuteSql($"DELETE FROM dbo.PostTag WHERE PostsId = {id}");
-                await _context.PostTag.Where(x => x.PostId == id).ExecuteDeleteAsync();
-                post.Tags = tagsToDb;
-                //_context.Attach(post);
+                await _context.Posts.Where(post => post.Id == id).SelectMany(post => post.PostTags).ExecuteDeleteAsync();
+                post.Tags = await _context.Tags.Where(tagDB => post.TagsString.Any(tagSelected => tagSelected == tagDB.Id)).ToListAsync();
                 _context.Update(post);
                 await _context.SaveChangesAsync();
             }

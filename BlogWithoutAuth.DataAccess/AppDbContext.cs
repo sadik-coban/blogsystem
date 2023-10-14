@@ -9,7 +9,6 @@ namespace BlogWithoutAuth.DataAccess
     {
         public virtual DbSet<Post> Posts { get; set; }
         public virtual DbSet<Author> Authors { get; set; }
-        public virtual DbSet<PostTag> PostTag { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Tag> Tags { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -29,3 +28,6 @@ namespace BlogWithoutAuth.DataAccess
 
     }
 }
+
+
+//public virtual DbSet<PostTag> PostTag { get; set; }

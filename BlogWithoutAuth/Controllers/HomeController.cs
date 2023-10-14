@@ -1,7 +1,5 @@
-﻿using BlogWithoutAuth.DataAccess;
-using BlogWithoutAuth.Models;
+﻿using BlogWithoutAuth.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace BlogWithoutAuth.Controllers
@@ -9,36 +7,23 @@ namespace BlogWithoutAuth.Controllers
  
     public class HomeController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(AppDbContext context)
+        public HomeController(ILogger<HomeController> logger)
         {
-            _context = context;
+            _logger = logger;
         }
 
-        public async Task<IActionResult> IndexAsync()
+        public IActionResult Index()
         {
-            var appDbContext = _context.Posts.Include(p => p.Author).Include(p => p.Category).Include(p => p.Tags);
-            return View(await appDbContext.ToListAsync());
+            return View();
         }
-        public async Task<IActionResult> Post(Guid? id)
+
+        public IActionResult Privacy()
         {
-            if (id == null || _context.Posts == null)
-            {
-                return NotFound();
-            }
-
-            var post = await _context.Posts
-                .Include(p => p.Author)
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (post == null)
-            {
-                return NotFound();
-            }
-
-            return View(post);
+            return View();
         }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

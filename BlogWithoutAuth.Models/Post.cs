@@ -8,7 +8,7 @@ namespace BlogWithoutAuth.Models
         public Guid Id { get; set; }
         public Guid AuthorId { get; set; }
         public Guid CategoryId { get; set; }
-        public Guid[] TagsString { get; set; }
+        public Guid[] TagIds { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
         public virtual Author Author { get; set; }

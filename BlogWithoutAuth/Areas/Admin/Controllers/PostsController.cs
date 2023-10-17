@@ -63,9 +63,9 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,AuthorId,CategoryId,TagsString,Title,Content")] Post post)
+        public async Task<IActionResult> Create([Bind("Id,AuthorId,CategoryId,TagIds,Title,Content")] Post post)
         {
-            post.Tags = await _context.Tags.Where(tagDB => post.TagsString.Any(tagSelected => tagSelected == tagDB.Id)).ToListAsync();
+            post.Tags = await _context.Tags.Where(tagDB => post.TagIds.Any(tagSelected => tagSelected == tagDB.Id)).ToListAsync();
             _context.Add(post);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -80,11 +80,14 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
             }
 
             var post = await _context.Posts.FindAsync(id);
-            Guid[] tagIds = await _context.Posts.Where(post => post.Id == id).SelectMany(post => post.PostTags.Select(postTag => postTag.TagsId)).ToArrayAsync();
             if (post == null)
             {
                 return NotFound();
             }
+            //Guid[] tagIds = await _context.Posts.Where(post => post.Id == id).SelectMany(post => post.PostTags.Select(postTag => postTag.TagsId)).ToArrayAsync();
+
+            Guid [] tagIds = post.Tags.Select(tag => tag.Id).ToArray();
+
             ViewData["AuthorId"] = new SelectList(_context.Authors, "Id", "Name", post.AuthorId);
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", post.CategoryId);
             ViewData["Tags"] = new MultiSelectList(_context.Tags, "Id", "Name", tagIds);
@@ -96,7 +99,7 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,AuthorId,CategoryId,TagsString,Title,Content")] Post post)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,AuthorId,CategoryId,TagIds,Title,Content")] Post post)
         {
             if (id != post.Id)
             {
@@ -105,7 +108,8 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
             try
             {
                 await _context.Posts.Where(post => post.Id == id).SelectMany(post => post.PostTags).ExecuteDeleteAsync();
-                post.Tags = await _context.Tags.Where(tagDB => post.TagsString.Any(tagSelected => tagSelected == tagDB.Id)).ToListAsync();
+                //_context.Posts.SingleOrDefault(post => post.Id == id).Tags.AsQueryable()
+                post.Tags = await _context.Tags.Where(tagDB => post.TagIds.Any(tagSelected => tagSelected == tagDB.Id)).ToListAsync();
                 _context.Update(post);
                 await _context.SaveChangesAsync();
             }

@@ -23,7 +23,7 @@ namespace BlogWithoutAuth.DataAccess
                 .WithMany(e => e.Posts)
                 .UsingEntity<PostTag>();
             modelBuilder.Entity<Post>()
-                .Ignore(nameof(Post.TagsString));
+                .Ignore(nameof(Post.TagIds));
         }
 
     }

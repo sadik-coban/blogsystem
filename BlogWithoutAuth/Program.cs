@@ -1,3 +1,4 @@
+using BlogWithoutAuth.Areas.Admin.Controllers;
 using BlogWithoutAuth.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -13,7 +14,7 @@ namespace BlogWithoutAuth
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-
+            builder.Services.AddScoped<PostsController>();
             builder
                 .Services
                 .AddDbContext<AppDbContext>();

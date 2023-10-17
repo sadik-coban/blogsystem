@@ -79,18 +79,20 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var post = await _context.Posts.FindAsync(id);
+            //Post? post = await _context.Posts.Include(post => post.Tags).FirstOrDefaultAsync(post => post.Id == id);
+            Post post = await _context.Posts.FindAsync(id);
+            //Debug.WriteLine(post.Tags.Count);
             if (post == null)
             {
                 return NotFound();
             }
             //Guid[] tagIds = await _context.Posts.Where(post => post.Id == id).SelectMany(post => post.PostTags.Select(postTag => postTag.TagsId)).ToArrayAsync();
 
-            Guid [] tagIds = post.Tags.Select(tag => tag.Id).ToArray();
-
+            //post.Tags.Remove(post.Tags.Select(tag => tag).ToArray()[0]);
+            _context.SaveChanges();
             ViewData["AuthorId"] = new SelectList(_context.Authors, "Id", "Name", post.AuthorId);
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", post.CategoryId);
-            ViewData["Tags"] = new MultiSelectList(_context.Tags, "Id", "Name", tagIds);
+            ViewData["Tags"] = new MultiSelectList(_context.Tags, "Id", "Name", post.Tags.Select(tag=> tag.Id).ToArray());
             return View(post);
         }
 
@@ -101,15 +103,28 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, [Bind("Id,AuthorId,CategoryId,TagIds,Title,Content")] Post post)
         {
+            
             if (id != post.Id)
             {
                 return NotFound();
             }
             try
             {
-                await _context.Posts.Where(post => post.Id == id).SelectMany(post => post.PostTags).ExecuteDeleteAsync();
+
+                Post? post_joined = await _context.Posts.Include(post => post.Tags).FirstOrDefaultAsync(post => post.Id == id);
+                Debug.WriteLine(post_joined.Tags.Count);
+                foreach(var tag in post_joined.Tags.ToList())
+                {
+                    post_joined.Tags.Remove(tag);
+                }
+                await _context.SaveChangesAsync();
+                Debug.WriteLine("anger loads!");
+                _context.Entry(post_joined).State = EntityState.Detached;
+                //post.Tags.RemoveRange(0, post.Tags.Count);
+                //await _context.Posts.Where(post => post.Id == id).SelectMany(post => post.PostTags).ExecuteDeleteAsync();
                 //_context.Posts.SingleOrDefault(post => post.Id == id).Tags.AsQueryable()
                 post.Tags = await _context.Tags.Where(tagDB => post.TagIds.Any(tagSelected => tagSelected == tagDB.Id)).ToListAsync();
+                
                 _context.Update(post);
                 await _context.SaveChangesAsync();
             }

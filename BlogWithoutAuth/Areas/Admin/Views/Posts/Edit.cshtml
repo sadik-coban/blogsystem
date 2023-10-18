@@ -11,6 +11,11 @@
 <div class="row">
     <div class="col">
         <form asp-action="Edit">
+@*             @for (int i = 0; i < Model.Tags.Count; i++)
+            {
+                @Html.HiddenFor(model => model.Tags[i].Id)
+                @Html.HiddenFor(model => model.Tags[i].Name)
+            } *@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group mb-2">

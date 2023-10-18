@@ -10,7 +10,7 @@ namespace BlogWithoutAuth.Models
     {
         public Guid PostId { get; set; }
         public Guid TagsId { get; set; }
-        public required virtual Post Post { get; set; }
-        public required virtual Tag Tag { get; set; }
+        public required Post Post { get; set; }
+        public required Tag Tag { get; set; }
     }
 }

@@ -9,6 +9,8 @@ using BlogWithoutAuth.DataAccess;
 using BlogWithoutAuth.Models;
 using System.Diagnostics;
 using BlogWithoutAuth.Models.ViewModels;
+using Microsoft.Extensions.Hosting;
+using Azure;
 
 namespace BlogWithoutAuth.Areas.Admin.Controllers
 {
@@ -25,7 +27,7 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
         // GET: Admin/Posts
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Posts.Include(p => p.Author).Include(p => p.Category).Include(p=>p.Tags);
+            var appDbContext = _context.Posts.Include(p => p.Author).Include(p => p.Category).Include(p => p.Tags);
             return View(await appDbContext.ToListAsync());
         }
 
@@ -79,20 +81,10 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            //Post? post = await _context.Posts.Include(post => post.Tags).FirstOrDefaultAsync(post => post.Id == id);
-            Post post = await _context.Posts.FindAsync(id);
-            //Debug.WriteLine(post.Tags.Count);
-            if (post == null)
-            {
-                return NotFound();
-            }
-            //Guid[] tagIds = await _context.Posts.Where(post => post.Id == id).SelectMany(post => post.PostTags.Select(postTag => postTag.TagsId)).ToArrayAsync();
-
-            //post.Tags.Remove(post.Tags.Select(tag => tag).ToArray()[0]);
-            _context.SaveChanges();
+            Post? post = await _context.Posts.Include(post => post.Tags).FirstOrDefaultAsync(post => post.Id == id);
             ViewData["AuthorId"] = new SelectList(_context.Authors, "Id", "Name", post.AuthorId);
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", post.CategoryId);
-            ViewData["Tags"] = new MultiSelectList(_context.Tags, "Id", "Name", post.Tags.Select(tag=> tag.Id).ToArray());
+            ViewData["Tags"] = new MultiSelectList(_context.Tags, "Id", "Name", post.Tags.Select(tag => tag.Id).ToArray());
             return View(post);
         }
 
@@ -103,29 +95,26 @@ namespace BlogWithoutAuth.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, [Bind("Id,AuthorId,CategoryId,TagIds,Title,Content")] Post post)
         {
-            
+
             if (id != post.Id)
             {
                 return NotFound();
             }
             try
             {
-
-                Post? post_joined = await _context.Posts.Include(post => post.Tags).FirstOrDefaultAsync(post => post.Id == id);
-                Debug.WriteLine(post_joined.Tags.Count);
-                foreach(var tag in post_joined.Tags.ToList())
-                {
-                    post_joined.Tags.Remove(tag);
-                }
-                await _context.SaveChangesAsync();
-                Debug.WriteLine("anger loads!");
-                _context.Entry(post_joined).State = EntityState.Detached;
-                //post.Tags.RemoveRange(0, post.Tags.Count);
-                //await _context.Posts.Where(post => post.Id == id).SelectMany(post => post.PostTags).ExecuteDeleteAsync();
-                //_context.Posts.SingleOrDefault(post => post.Id == id).Tags.AsQueryable()
-                post.Tags = await _context.Tags.Where(tagDB => post.TagIds.Any(tagSelected => tagSelected == tagDB.Id)).ToListAsync();
+                Post? postToUpdate = await _context.Posts.Include(post => post.Tags).FirstOrDefaultAsync(post => post.Id == id);
                 
-                _context.Update(post);
+                foreach (var tag in postToUpdate.Tags.ToList())
+                {
+                    post.Tags.Remove(tag);
+                }
+
+                postToUpdate.AuthorId = post.AuthorId;
+                postToUpdate.CategoryId = post.CategoryId;
+                postToUpdate.Title = post.Title;
+                postToUpdate.Content = post.Content;
+                postToUpdate.Tags = await _context.Tags.Where(tagDB => post.TagIds.Any(tagSelected => tagSelected == tagDB.Id)).ToListAsync();
+                _context.Update(postToUpdate);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)

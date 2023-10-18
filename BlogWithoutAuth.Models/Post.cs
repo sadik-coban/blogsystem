@@ -11,9 +11,9 @@ namespace BlogWithoutAuth.Models
         public Guid[] TagIds { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
-        public virtual Author Author { get; set; }
-        public virtual Category Category { get; set; }
-        public virtual List<PostTag> PostTags { get; } = new();
-        public virtual List<Tag> Tags { get; set; } = new();  
+        public  Author Author { get; set; }
+        public  Category Category { get; set; }
+        public  List<PostTag> PostTags { get; } = new();
+        public  List<Tag> Tags { get; set; } = new();  
     }
 }

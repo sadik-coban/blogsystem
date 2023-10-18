@@ -7,13 +7,14 @@ namespace BlogWithoutAuth.DataAccess
 
     public class AppDbContext : DbContext
     {
-        public virtual DbSet<Post> Posts { get; set; }
-        public virtual DbSet<Author> Authors { get; set; }
-        public virtual DbSet<Category> Categories { get; set; }
-        public virtual DbSet<Tag> Tags { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<Author> Authors { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Tag> Tags { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseLazyLoadingProxies().UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=BlogWithoutAuthDBA;Trusted_Connection=True;");
+            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=BlogWithoutAuthDBA;Trusted_Connection=True;");
+            //.UseLazyLoadingProxies()
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

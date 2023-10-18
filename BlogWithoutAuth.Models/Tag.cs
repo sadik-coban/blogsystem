@@ -10,8 +10,8 @@ namespace BlogWithoutAuth.Models
     {
         public Guid Id { get; set; }
         public required string Name { get; set; }
-        public virtual List<PostTag> PostTags { get; } = new();
-        public virtual List<Post> Posts { get; set; } = new();
+        public List<PostTag> PostTags { get; } = new();
+        public List<Post> Posts { get; set; } = new();
     }
 
 }
